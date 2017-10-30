@@ -1,25 +1,81 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Course Project 1 - Peer Guided Assignment"
+author: "AM"
+date: "18 October 2017"
+output: html_document
 ---
+```{r setup, include= FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Loading and preprocessing the data
+```{r, echo= TRUE,results='hide',message=FALSE,warning=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+datas <- read_csv("activity.zip")
+datas$steps <- as.numeric(datas$steps)
+```
+### Mean total number of steps taken per day
+
+```{r, echo= TRUE}
+total_step <- group_by(datas,date)
+total_step <- summarise(total_step,sum(steps,na.rm = TRUE))
+names(total_step) <- c("date","total")
+hist(total_step$total,main = "Total Number of Steps taken per day", xlab = "Number of Steps",ylab = "Frequency")
+mean_step <- mean(total_step$total,na.rm = TRUE)
+median_step <- median(total_step$total,na.rm = TRUE)
+print(paste("Mean of total number of steps :",mean_step))
+print(paste("Median of total number of steps :",median_step))
+```
+### Average daily activity pattern
+```{r, echo= TRUE}
+ avg_step <- group_by(datas,interval)
+ avg_step <- summarise(avg_step,mean(steps,na.rm = TRUE))
+ names(avg_step) <- c("interval","avg")
+ max_step_index <- which.max(avg_step$avg)
+ g <- ggplot(avg_step,aes(interval,avg))  
+ g + geom_point(col = "blue") +geom_line(col = "red")+ labs(title = "Average Steps Taken per interval", x = "Interval",y = "Number of Steps")+
+   geom_text(data = avg_step[max_step_index,],
+             label = paste("Maximum no. of Steps at Interval",avg_step$interval[max_step_index]))
+```
+
+### Imputing missing values and plotting histogram again
+
+```{r, echo= TRUE}
+ miss <- which(is.na(datas))
+ print(paste("No. of missing rows in data : ", length(miss)))
+#### Missing value replacement : Every NAs in steps is replaced by mean of no of steps in that date
+ impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+ dat2 <- datas %>%
+      group_by(interval) %>%
+      mutate(steps = impute.mean(steps))
+ total_step <- group_by(dat2,date)
+ total_step <- summarise(total_step,sum(steps,na.rm = TRUE))
+ names(total_step) <- c("date","total")
+ hist(total_step$total,main = "Total Number of Steps taken per day", xlab = "Number of Steps",ylab = "Frequency")
+ mean_step <- mean(total_step$total,na.rm = TRUE)
+ median_step <- median(total_step$total,na.rm = TRUE)
+ print(paste("Mean of total number of steps :",mean_step))
+ print(paste("Median of total number of steps :",median_step))
+            
+    
+```
+
+### Differences in activity patterns between weekdays and weekends
+
+```{r, echo= TRUE}
+ weekend <- c("Sunday","Saturday")
+ week_f <- function(dates) {ifelse((weekdays(dates) %in% weekend),1,0)}
+ dat2$day_f <- sapply(dat2$date,week_f)
+ dat2$day_f <- factor(dat2$day_f,levels = c("0","1"), labels = c("weekday","weekend"))
+ avg_step <- group_by(dat2,interval,day_f)
+ avg_step <- summarise(avg_step,mean(steps,na.rm = TRUE))
+ names(avg_step) <- c("interval","day_f","avg") 
+ g <- ggplot(avg_step, aes(interval,avg))
+ g + geom_line(color="aquamarine4")+facet_wrap(~day_f,nrow = 2)+
+   labs(x = "Interval", y = "Number of steps",title = "Step Count - Weekday V/S Weekend")
+
+````
 
 
-## Loading and preprocessing the data
-
-
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
