@@ -4,9 +4,6 @@ author: "AM"
 date: "18 October 2017"
 output: html_document
 ---
-```{r setup, include= FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 ### Loading and preprocessing the data
 ```{r, echo= TRUE,results='hide',message=FALSE,warning=FALSE}
 library(readr)
