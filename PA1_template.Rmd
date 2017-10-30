@@ -89,6 +89,5 @@ datas$steps <- as.numeric(datas$steps)
 
  
 ````
-````{r, echo= TRUE}
-knt
+
 
